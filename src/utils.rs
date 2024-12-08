@@ -1,40 +1,31 @@
 use crate::types::{Point3D, PointSet};
-use ply_rs::{parser::Parser, ply::DefaultElement};
-use std::{fs::File, io::BufReader};
+use ply_rs::parser::Parser;
+use std::fs::File;
 
-pub fn load_ply_as_point_cloud(file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn load_ply_as_point_set(
+    file_path: &str,
+) -> Result<PointSet<Point3D>, Box<dyn std::error::Error>> {
     // Open the PLY file
-    let mut file = File::open(file_path)?;
+    let file = File::open(file_path)?;
+    let mut f = std::io::BufReader::new(file);
 
     // Initialize the PLY parser
-    let parser = Parser::<DefaultElement>::new();
-    let ply = parser.read_ply(&mut file)?;
+    let point_3d_parser = Parser::<Point3D>::new();
 
-    // proof that data has been read
-    println!("Ply header: {:#?}", ply.header);
-    println!("Ply data: {:?}", ply.payload);
+    let header = point_3d_parser.read_header(&mut f).unwrap();
 
-    // let header = parser.read_header(&mut reader)?;
-
-    // // Ensure the file has a "vertex" element with x, y, z properties
-    // let vertex_def = header
-    //     .elements
-    //     .get("vertex")
-    //     .ok_or("PLY file does not contain a 'vertex' element")?;
-
-    // if !(vertex_def. .contains("x") && vertex_def.contains("y") && vertex_def.contains("z")) {
-    //     return Err("Vertex element does not contain x, y, z properties".into());
-    // }
-    // // Convert to nalgebra points
-    // let points: Vec<Vector3<f32>> = vertices
-    //     .into_iter()
-    //     .map(|vertex| {
-    //         let x = vertex["x"].as_float().unwrap_or(0.0) as f32;
-    //         let y = vertex["y"].as_float().unwrap_or(0.0) as f32;
-    //         let z = vertex["z"].as_float().unwrap_or(0.0) as f32;
-    //         Vector3::new(x, y, z)
-    //     })
-    //     .collect();
-
-    Ok(())
+    let mut points = vec![];
+    for (_, element) in &header.elements {
+        // we could also just parse them in sequence, but the file format might change
+        match element.name.as_ref() {
+            "vertex" => {
+                points = point_3d_parser
+                    .read_payload_for_element(&mut f, &element, &header)
+                    .unwrap();
+            }
+            _ => {}
+        }
+    }
+    // println!("point list: {:#?}", points);
+    Ok(PointSet { points })
 }
