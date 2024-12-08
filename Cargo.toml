@@ -1,0 +1,12 @@
+[package]
+name = "rust_icp"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "icp_test"
+path = "src/bin/main.rs"
+
+[dependencies]
+nalgebra = "0.33.2"
+ply-rs = "0.1.3"
