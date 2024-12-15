@@ -1,3 +1,4 @@
+use rust_icp::types::Point;
 use rust_icp::{
     icp::Icp,
     utils::{load_ply_as_point_set, visualise_points},
@@ -21,7 +22,7 @@ fn main() {
 
     // Target point cloud
     let target_cloud_path = "data/bun045.ply";
-    let target_point_set = match load_ply_as_point_set(target_cloud_path) {
+    let mut target_point_set = match load_ply_as_point_set(target_cloud_path) {
         Ok(point_set) => {
             println!(
                 "Successfully loaded target point set of {:?} points",
@@ -43,6 +44,11 @@ fn main() {
     let result = icp.register(target_point_set.clone());
     println!("{}", result);
 
+    // Apply transformation on target cloud
+    for point in &mut target_point_set.points {
+        point.apply_transformation(&result);
+    }
+
     // Visualise points
-    visualise_points(&model_point_set, &target_point_set, result);
+    visualise_points(&model_point_set, &target_point_set);
 }

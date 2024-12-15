@@ -31,9 +31,4 @@ pub fn load_ply_as_point_set(
     Ok(PointSet { points })
 }
 
-pub fn visualise_points(
-    model_cloud: &PointSet<Point3D>,
-    target_cloud: &PointSet<Point3D>,
-    transformation: OMatrix<f64, Dyn, Dyn>,
-) {
-}
+pub fn visualise_points(model_cloud: &PointSet<Point3D>, target_cloud: &PointSet<Point3D>) {}
