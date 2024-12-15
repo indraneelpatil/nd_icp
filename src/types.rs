@@ -1,8 +1,17 @@
+use nalgebra::{Vector3, Vector4, VectorN};
 // Created by Indraneel on 7th Dec
+use nalgebra::{SVector, U3};
 use ply_rs::ply;
 
-pub struct PointSet<T> {
+pub struct PointSet<T>
+where
+    T: Point,
+{
     pub points: Vec<T>,
+}
+
+pub trait Point {
+    fn get_dimensions(&self) -> usize;
 }
 
 #[derive(Debug)]
@@ -10,6 +19,12 @@ pub struct Point3D {
     pub x: f32,
     pub y: f32,
     pub z: f32,
+}
+
+impl Point for Point3D {
+    fn get_dimensions(&self) -> usize {
+        3
+    }
 }
 
 impl ply::PropertyAccess for Point3D {

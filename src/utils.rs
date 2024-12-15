@@ -1,4 +1,4 @@
-use crate::types::{Point3D, PointSet};
+use crate::types::{Point, Point3D, PointSet};
 use ply_rs::parser::Parser;
 use std::fs::File;
 
