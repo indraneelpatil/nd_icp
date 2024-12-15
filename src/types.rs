@@ -1,4 +1,4 @@
-use nalgebra::{Dyn, OMatrix, Vector3, Vector4, VectorN};
+use nalgebra::{Dyn, OMatrix, Vector3, Vector4, VectorN, U1, U4};
 // Created by Indraneel on 7th Dec
 use nalgebra::{SVector, U3};
 use ply_rs::ply;
@@ -13,7 +13,7 @@ where
 
 pub trait Point {
     fn get_dimensions(&self) -> usize;
-    fn apply_transformation(&mut self, transformation: &OMatrix<f64, Dyn, Dyn>);
+    fn apply_transformation(&mut self, transformation: &OMatrix<f32, Dyn, Dyn>);
 }
 
 #[derive(Debug, Clone)]
@@ -28,7 +28,18 @@ impl Point for Point3D {
         3
     }
 
-    fn apply_transformation(&mut self, transformation: &OMatrix<f64, Dyn, Dyn>) {}
+    fn apply_transformation(&mut self, transformation: &OMatrix<f32, Dyn, Dyn>) {
+        // Express point in homogenous coordinates
+        let homogenous_coordinates: OMatrix<f32, U1, U4> =
+            OMatrix::from([self.x, self.y, self.z, 1.0]);
+
+        let transformed_coordinates = homogenous_coordinates * transformation;
+
+        // Update point
+        self.x = *transformed_coordinates.get(0).expect("Missing x");
+        self.y = *transformed_coordinates.get(1).expect("Missing y");
+        self.z = *transformed_coordinates.get(2).expect("Missing z");
+    }
 }
 
 impl ply::PropertyAccess for Point3D {

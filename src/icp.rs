@@ -39,7 +39,7 @@ where
     /// 3. Find transformaton and rotation which will minimise the error
     /// 4. Transform the target cloud
     /// 5. Iterate until within error threshold or max iterations
-    pub fn register(&self, target_point_set: PointSet<T>) -> OMatrix<f64, Dyn, Dyn> {
+    pub fn register(&self, target_point_set: PointSet<T>) -> OMatrix<f32, Dyn, Dyn> {
         let dimension = target_point_set
             .points
             .iter()
@@ -48,7 +48,7 @@ where
             .get_dimensions();
 
         // Initialise transformation
-        let identity_matrix: OMatrix<f64, Dyn, Dyn> =
+        let identity_matrix: OMatrix<f32, Dyn, Dyn> =
             OMatrix::identity_generic(nalgebra::Dyn(dimension + 1), nalgebra::Dyn(dimension + 1));
 
         identity_matrix
