@@ -1,4 +1,5 @@
 use crate::types::{Point, Point3D, PointSet};
+use nalgebra::{Dyn, OMatrix};
 use ply_rs::parser::Parser;
 use std::fs::File;
 
@@ -28,4 +29,11 @@ pub fn load_ply_as_point_set(
     }
     // println!("point list: {:#?}", points);
     Ok(PointSet { points })
+}
+
+pub fn visualise_points(
+    model_cloud: &PointSet<Point3D>,
+    target_cloud: &PointSet<Point3D>,
+    transformation: OMatrix<f64, Dyn, Dyn>,
+) {
 }

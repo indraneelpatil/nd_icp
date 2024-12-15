@@ -1,4 +1,7 @@
-use rust_icp::utils::load_ply_as_point_set;
+use rust_icp::{
+    icp::Icp,
+    utils::{load_ply_as_point_set, visualise_points},
+};
 
 fn main() {
     // Model point cloud
@@ -30,4 +33,16 @@ fn main() {
             panic!("Could not load target point set {err:?}");
         }
     };
+
+    // Initialise ICP
+    let max_iterations = 1000;
+    let dist_delta = 1e-2;
+    let icp = Icp::new(model_point_set.clone(), max_iterations, dist_delta);
+
+    // Run ICP
+    let result = icp.register(target_point_set.clone());
+    println!("{}", result);
+
+    // Visualise points
+    visualise_points(&model_point_set, &target_point_set, result);
 }
