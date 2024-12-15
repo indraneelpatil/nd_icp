@@ -30,15 +30,15 @@ impl Point for Point3D {
 
     fn apply_transformation(&mut self, transformation: &OMatrix<f32, Dyn, Dyn>) {
         // Express point in homogenous coordinates
-        let homogenous_coordinates: OMatrix<f32, U1, U4> =
+        let homogenous_coordinates: OMatrix<f32, U4, U1> =
             OMatrix::from([self.x, self.y, self.z, 1.0]);
 
-        let transformed_coordinates = homogenous_coordinates * transformation;
+        let transformed_coordinates = transformation * homogenous_coordinates;
 
         // Update point
-        self.x = *transformed_coordinates.get(0).expect("Missing x");
-        self.y = *transformed_coordinates.get(1).expect("Missing y");
-        self.z = *transformed_coordinates.get(2).expect("Missing z");
+        self.x = transformed_coordinates[(0, 0)];
+        self.y = transformed_coordinates[(1, 0)];
+        self.z = transformed_coordinates[(2, 0)];
     }
 }
 
