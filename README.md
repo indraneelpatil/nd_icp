@@ -28,7 +28,7 @@
 * This gives us a symmetric matrix from a non symmetric matrix
 
 #### Singular value decomposition
-* Any matrix can be represented as a matrix multiplication of three special matrices
+* Any matrix can be represented as a matrix multiplication of three special matrices where 1st and 3rd are orthonagonal matrices which cause rotation but second matrix is diagonal and causes stretching
 
 ### References
 * https://youtube.com/@visualkernel/videos
