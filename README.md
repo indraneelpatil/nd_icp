@@ -35,5 +35,10 @@
 * Singular value decomposition: Any matrix can be represented as a matrix multiplication of three special matrices where 1st and 3rd are orthonagonal matrices (composed of the singular vectors) which cause rotation but second matrix is diagonal (composed of the singular values) and causes stretching
 * Intuitively we are rotating the eigen vectors to align with standard basis and then the diagonal rectangular matrix is the dimension eraser which is removing a dimension and then we are rotating it back to align with the eigen vectors
 
+#### Questions
+1. Intuitively which direction do the eigen vectors point in?
+2. How to visualise transpose of a matrix?
+
+
 ### References
 * https://youtube.com/@visualkernel/videos
