@@ -17,6 +17,10 @@
 * Eigen value is the scaling constant for the eigen vector
 * Intuitively they point in the direction of most significant variation
 
+#### Diagonal matrices
+* Diagonal matrices scale a vector uniformly in all directions without rotating or changing direction of the vector
+* Special case: Identity matrix which scales everything by 1
+
 #### Rectangular matrices
 * Rectangular matrices can add or subtract a dimension when applied to a vector
 
