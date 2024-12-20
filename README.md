@@ -13,7 +13,7 @@
 * Unfortunately this isnt unique
 
 #### Eigenvectors/ Eigenvalues of matrix
-* Vector which only undergoes scales after matrix transformation but maintains direction
+* Vector which only gets scaled after matrix transformation but maintains direction
 * Eigen value is the scaling constant for the eigen vector
 
 #### Rectangular matrices
