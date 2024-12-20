@@ -15,6 +15,7 @@
 #### Eigenvectors/ Eigenvalues of matrix
 * Vector which only gets scaled after matrix transformation but maintains direction
 * Eigen value is the scaling constant for the eigen vector
+* Intuitively they point in the direction of most significant variation
 
 #### Rectangular matrices
 * Rectangular matrices can add or subtract a dimension when applied to a vector
@@ -37,7 +38,6 @@
 * Goal of SVD is to decompose a transformation into the above three sequential actions
 
 #### Questions
-1. Intuitively which direction do the eigen vectors point in?
 2. How to visualise transpose of a matrix?
 
 
