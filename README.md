@@ -33,6 +33,7 @@
 * Eigen vectors of S_R are called right singular vectors and a matrix of those eigen vectors is called right singular matrix
 * Square root of those eigen values of the above eigen vectors are called singular values of the original matrix A
 * Singular value decomposition: Any matrix can be represented as a matrix multiplication of three special matrices where 1st and 3rd are orthonagonal matrices (composed of the singular vectors) which cause rotation but second matrix is diagonal (composed of the singular values) and causes stretching
+* Intuitively we are rotating the eigen vectors to align with standard basis and then the diagonal rectangular matrix is the dimension eraser which is removing a dimension and then we are rotating it back to align with the eigen vectors
 
 ### References
 * https://youtube.com/@visualkernel/videos
