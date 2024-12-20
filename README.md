@@ -28,7 +28,11 @@
 * This gives us a symmetric matrix from a non symmetric matrix
 
 #### Singular value decomposition
-* Any matrix can be represented as a matrix multiplication of three special matrices where 1st and 3rd are orthonagonal matrices which cause rotation but second matrix is diagonal and causes stretching
+* AA^T is the left symmetrix matrix S_L and A^TA is the right symmetrix matrix S_R
+* Eigen vectors of S_L are called left singular vectors and a matrix of those eigen vectors is called the left singular matrix
+* Eigen vectors of S_R are called right singular vectors and a matrix of those eigen vectors is called right singular matrix
+* Square root of those eigen values of the above eigen vectors are called singular values of the original matrix A
+* Singular value decomposition: Any matrix can be represented as a matrix multiplication of three special matrices where 1st and 3rd are orthonagonal matrices (composed of the singular vectors) which cause rotation but second matrix is diagonal (composed of the singular values) and causes stretching
 
 ### References
 * https://youtube.com/@visualkernel/videos
