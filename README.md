@@ -12,6 +12,11 @@
 * The matrix which applies the opposite transformation to the original matrix
 * Unfortunately this isnt unique
 
+#### Transposing a matrix
+* Transpose of a symmetric matrix is the symmetric matrix itself
+* Transpose of a orthagonal matrix is the orthogonal matrix inverse so rotation in the opposite direction
+* Transposing a rectangular matrix gives us switched dimensions
+
 #### Eigenvectors/ Eigenvalues of matrix
 * Vector which only gets scaled after matrix transformation but maintains direction
 * Eigen value is the scaling constant for the eigen vector
@@ -41,8 +46,6 @@
 * Intuitively we are rotating the eigen vectors to align with standard basis and then the diagonal rectangular matrix is the dimension eraser which is removing a dimension (not always sometimes it just causes stretching, depends on if the original matrix is reactangular or not) and then we are rotating it back to align with the eigen vectors
 * Goal of SVD is to decompose a transformation into the above three sequential actions
 
-#### Questions
-2. How to visualise transpose of a matrix?
 
 
 ### References
