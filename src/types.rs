@@ -19,6 +19,7 @@ pub trait Point {
     fn apply_transformation(&mut self, transformation: &OMatrix<f32, Dyn, Dyn>);
     fn find_distance(&self, other_point: &Self) -> f32;
     fn find_distance_squared(&self, other_point: &Self) -> f32;
+    fn to_vec(&self) -> Vec<f32>;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -99,6 +100,10 @@ impl Point for Point3D {
         (other_point.x - self.x) * (other_point.x - self.x)
             + (other_point.y - self.y) * (other_point.y - self.y)
             + ((other_point.z - self.z) * (other_point.z - self.z))
+    }
+
+    fn to_vec(&self) -> Vec<f32> {
+        vec![self.x, self.y, self.z]
     }
 }
 

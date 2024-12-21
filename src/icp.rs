@@ -6,7 +6,7 @@ use std::{
     ops::{Div, Sub},
 };
 
-use nalgebra::{Dyn, OMatrix};
+use nalgebra::{Dyn, OMatrix, U1, U4};
 
 use crate::types::{Point, PointSet};
 
@@ -65,6 +65,18 @@ where
         model_point_correspondences
     }
 
+    pub fn get_matrix_from_point_set(
+        &self,
+        point_set: &Vec<T>,
+        dimension: usize,
+    ) -> OMatrix<f32, Dyn, Dyn> {
+        let points_vec: Vec<Vec<f32>> = point_set.iter().map(|point| point.to_vec()).collect();
+        let points_vec_flattened: Vec<f32> = points_vec.into_iter().flatten().collect();
+        let target_mat: OMatrix<f32, Dyn, Dyn> =
+            OMatrix::from_vec_generic(Dyn(point_set.len()), Dyn(dimension), points_vec_flattened);
+        target_mat
+    }
+
     /// ICP registrations
     ///
     /// 1. Initialise the transformation given number of dimensions
@@ -110,6 +122,12 @@ where
                 .iter()
                 .map(|target_point| *target_point - target_set_mean)
                 .collect();
+
+            // Calculate cross covariance
+            let target_mat = self.get_matrix_from_point_set(&target_points_no_mean, dimension);
+            let model_mat =
+                self.get_matrix_from_point_set(&model_point_correspondences_no_mean, dimension);
+            let cross_covariance_mat = target_mat.transpose() * model_mat;
 
             // Find rotation and translation
 
