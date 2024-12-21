@@ -52,6 +52,13 @@
 * Points are noisy so no perfect alignment exists
 * Find the rotation R and translation t between the two points such that Min(Sum(Yn - (Xn*R+t))
 
+#### Algorithm
+* Guess initial transformation
+* Find closest point correspondences
+* Find optimal rotation and translation to min the sum of squared error
+* Shift the point cloud and repeat these steps until satisfied
+
 ### References
 * https://youtube.com/@visualkernel/videos
 * https://people.eecs.berkeley.edu/~pabbeel/cs287-fa11/slides/perception-for-robotics-instance-detection.pdf
+* https://www.youtube.com/watch?v=dhzLQfDBx2Q
