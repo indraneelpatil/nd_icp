@@ -1,6 +1,10 @@
 // Created by Indraneel on 12/8/24
 
 use core::f32;
+use std::{
+    iter::Sum,
+    ops::{Div, Sub},
+};
 
 use nalgebra::{Dyn, OMatrix};
 
@@ -14,7 +18,7 @@ use crate::types::{Point, PointSet};
 /// 2. Voxel binning
 pub struct Icp<T>
 where
-    T: Point,
+    T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
 {
     /// Model reference to register against
     model_point_set: PointSet<T>,
@@ -26,7 +30,7 @@ where
 
 impl<T> Icp<T>
 where
-    T: Point,
+    T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
 {
     pub fn new(model_point_set: PointSet<T>, max_iterations: i32, dist_delta: f32) -> Self {
         Self {
@@ -36,7 +40,7 @@ where
         }
     }
 
-    pub fn get_point_correspondences(&self, target_point_set: &PointSet<T>) -> Vec<&T> {
+    pub fn get_point_correspondences(&self, target_point_set: &PointSet<T>) -> Vec<T> {
         let mut model_point_correspondences = vec![];
         for target_point in &target_point_set.points {
             let mut closest_point_idx = None;
@@ -54,6 +58,7 @@ where
                 self.model_point_set
                     .points
                     .get(closest_point_idx.expect("Failed to get closest point"))
+                    .copied()
                     .expect("Invalid closest point"),
             );
         }
@@ -65,9 +70,10 @@ where
     /// 1. Initialise the transformation given number of dimensions
     /// 2. For each point
     ///     - Find closest point in reference cloud
-    /// 3. Find transformaton and rotation which will minimise the error
-    /// 4. Transform the target cloud
-    /// 5. Iterate until within error threshold or max iterations
+    /// 3. Remove the means
+    /// 4. Find transformaton and rotation which will minimise the error
+    /// 5. Transform the target cloud
+    /// 6. Iterate until within error threshold or max iterations
     pub fn register(&self, target_point_set: PointSet<T>) -> OMatrix<f32, Dyn, Dyn> {
         let dimension = target_point_set
             .points
@@ -83,7 +89,29 @@ where
         // Begin iterations
         for iteration in 0..self.max_iterations {
             // Find point correspondences
-            let mut model_point_correspondences = self.get_point_correspondences(&target_point_set);
+            let model_point_correspondences = self.get_point_correspondences(&target_point_set);
+
+            // Remove the means from the point clouds
+            let model_set_mean: T = model_point_correspondences
+                .iter()
+                .map(|point| *point / model_point_correspondences.len() as f32)
+                .sum();
+            let model_point_correspondences_no_mean: Vec<T> = model_point_correspondences
+                .iter()
+                .map(|model_point| *model_point - model_set_mean)
+                .collect();
+            let target_set_mean: T = target_point_set
+                .points
+                .iter()
+                .map(|point| *point / target_point_set.points.len() as f32)
+                .sum();
+            let target_points_no_mean: Vec<T> = target_point_set
+                .points
+                .iter()
+                .map(|target_point| *target_point - target_set_mean)
+                .collect();
+
+            // Find rotation and translation
 
             println!("=== Finished iteration {} with cost {}", iteration, 0.0);
         }

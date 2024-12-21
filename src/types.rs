@@ -1,3 +1,6 @@
+use std::iter::Sum;
+use std::ops::{Div, Sub};
+
 use nalgebra::{Dyn, OMatrix, Vector3, Vector4, VectorN, U1, U4};
 // Created by Indraneel on 7th Dec
 use nalgebra::{SVector, U3};
@@ -18,11 +21,53 @@ pub trait Point {
     fn find_distance_squared(&self, other_point: &Self) -> f32;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Point3D {
     pub x: f32,
     pub y: f32,
     pub z: f32,
+}
+
+impl Div<f32> for Point3D {
+    type Output = Point3D;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        assert!(rhs != 0.0, "Division by zero is not allowed");
+        Point3D {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
+    }
+}
+
+impl Sub<Self> for Point3D {
+    type Output = Point3D;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Point3D {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl Sum for Point3D {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(
+            Point3D {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            |acc, point| Point3D {
+                x: acc.x + point.x,
+                y: acc.y + point.y,
+                z: acc.z + point.z,
+            },
+        )
+    }
 }
 
 impl Point for Point3D {
