@@ -46,7 +46,11 @@
 * Intuitively we are rotating the eigen vectors to align with standard basis and then the diagonal rectangular matrix is the dimension eraser which is removing a dimension (not always sometimes it just causes stretching, depends on if the original matrix is reactangular or not) and then we are rotating it back to align with the eigen vectors
 * Goal of SVD is to decompose a transformation into the above three sequential actions
 
-
+### Iterative Closest point
+#### Setup
+* Assume two sets of points X and Y with unknown correspondences
+* Points are noisy so no perfect alignment exists
+* Find the rotation R and translation t between the two points such that Min(Sum(Yn - (Xn*R+t))
 
 ### References
 * https://youtube.com/@visualkernel/videos
