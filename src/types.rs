@@ -14,6 +14,8 @@ where
 pub trait Point {
     fn get_dimensions(&self) -> usize;
     fn apply_transformation(&mut self, transformation: &OMatrix<f32, Dyn, Dyn>);
+    fn find_distance(&self, other_point: &Self) -> f32;
+    fn find_distance_squared(&self, other_point: &Self) -> f32;
 }
 
 #[derive(Debug, Clone)]
@@ -39,6 +41,19 @@ impl Point for Point3D {
         self.x = transformed_coordinates[(0, 0)];
         self.y = transformed_coordinates[(1, 0)];
         self.z = transformed_coordinates[(2, 0)];
+    }
+
+    fn find_distance(&self, other_point: &Self) -> f32 {
+        ((other_point.x - self.x) * (other_point.x - self.x)
+            + (other_point.y - self.y) * (other_point.y - self.y)
+            + ((other_point.z - self.z) * (other_point.z - self.z)))
+            .sqrt()
+    }
+
+    fn find_distance_squared(&self, other_point: &Self) -> f32 {
+        (other_point.x - self.x) * (other_point.x - self.x)
+            + (other_point.y - self.y) * (other_point.y - self.y)
+            + ((other_point.z - self.z) * (other_point.z - self.z))
     }
 }
 
