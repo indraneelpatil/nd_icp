@@ -129,7 +129,18 @@ where
                 self.get_matrix_from_point_set(&model_point_correspondences_no_mean, dimension);
             let cross_covariance_mat = target_mat.transpose() * model_mat;
 
-            // Find rotation and translation
+            // Find best rotation
+            let res = nalgebra::linalg::SVD::new(cross_covariance_mat, true, true);
+            let u = res.u.unwrap();
+            let vt = res.v_t.unwrap();
+            let rotation = u * vt;
+
+            // Find translation
+            let target_set_mean_mat =
+                OMatrix::from_vec_generic(U1, Dyn(dimension), target_set_mean.to_vec());
+            let model_set_mean_mat =
+                OMatrix::from_vec_generic(U1, Dyn(dimension), model_set_mean.to_vec());
+            let translation = target_set_mean_mat - rotation * model_set_mean_mat;
 
             println!("=== Finished iteration {} with cost {}", iteration, 0.0);
         }
