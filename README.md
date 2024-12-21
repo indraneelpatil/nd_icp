@@ -58,6 +58,12 @@
 * Find optimal rotation and translation to min the sum of squared error
 * Shift the point cloud and repeat these steps until satisfied
 
+#### Questions
+1. To find rotation and translation between known sets of corresponding points why cant we just use a matrix inverse?
+* For two transformations which consists of rotation and translation, we can just do matrix inverse to find the relative transformation
+* For two sets of points thats not possible because points themselves dont have a rotation, we want to find a Ax + t which minimises the squared error between them
+* Thats why we need a cross covariance matrix and the SVD of that to estimate the rotation
+
 ### References
 * https://youtube.com/@visualkernel/videos
 * https://people.eecs.berkeley.edu/~pabbeel/cs287-fa11/slides/perception-for-robotics-instance-detection.pdf
