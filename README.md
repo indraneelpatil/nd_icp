@@ -50,3 +50,4 @@
 
 ### References
 * https://youtube.com/@visualkernel/videos
+* https://people.eecs.berkeley.edu/~pabbeel/cs287-fa11/slides/perception-for-robotics-instance-detection.pdf
