@@ -77,6 +77,14 @@ where
         target_mat
     }
 
+    pub fn get_homogenous_matrix(
+        &self,
+        translation: &OMatrix<f32, U1, Dyn>,
+        rotation: &OMatrix<f32, Dyn, Dyn>,
+    ) -> OMatrix<f32, Dyn, Dyn> {
+        unimplemented!()
+    }
+
     /// ICP registrations
     ///
     /// 1. Initialise the transformation given number of dimensions
@@ -95,7 +103,7 @@ where
             .get_dimensions();
 
         // Initialise transformation
-        let identity_matrix: OMatrix<f32, Dyn, Dyn> =
+        let mut identity_matrix: OMatrix<f32, Dyn, Dyn> =
             OMatrix::identity_generic(nalgebra::Dyn(dimension + 1), nalgebra::Dyn(dimension + 1));
 
         // Begin iterations
@@ -140,7 +148,20 @@ where
                 OMatrix::from_vec_generic(U1, Dyn(dimension), target_set_mean.to_vec());
             let model_set_mean_mat =
                 OMatrix::from_vec_generic(U1, Dyn(dimension), model_set_mean.to_vec());
-            let translation = target_set_mean_mat - rotation * model_set_mean_mat;
+            let translation = target_set_mean_mat
+                - (rotation.clone() * model_set_mean_mat.transpose()).transpose();
+
+            println!(" r {} test {}", rotation, translation);
+
+            // Update identity matrix
+            let homogenous_mat = self.get_homogenous_matrix(&translation, &rotation);
+            identity_matrix *= homogenous_mat;
+
+            // Transform target cloud
+
+            // Check termination condition
+
+            // Calculate cost
 
             println!("=== Finished iteration {} with cost {}", iteration, 0.0);
         }

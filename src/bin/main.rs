@@ -36,7 +36,7 @@ fn main() {
     };
 
     // Initialise ICP
-    let max_iterations = 1000;
+    let max_iterations = 1;
     let dist_delta = 1e-2;
     let icp = Icp::new(model_point_set.clone(), max_iterations, dist_delta);
 
