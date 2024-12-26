@@ -100,6 +100,10 @@ where
         homogeneous_matrix
     }
 
+    pub fn get_translation_distance(&self, translation: &OMatrix<f32, U1, Dyn>) -> f32 {
+        translation.iter().map(|val| val * val).sum::<f32>().sqrt()
+    }
+
     /// ICP registrations
     ///
     /// 1. Initialise the transformation given number of dimensions
@@ -109,7 +113,7 @@ where
     /// 4. Find transformaton and rotation which will minimise the error
     /// 5. Transform the target cloud
     /// 6. Iterate until within error threshold or max iterations
-    pub fn register(&self, target_point_set: PointSet<T>) -> OMatrix<f32, Dyn, Dyn> {
+    pub fn register(&self, target_point_set: &mut PointSet<T>) -> OMatrix<f32, Dyn, Dyn> {
         let dimension = target_point_set
             .points
             .iter()
@@ -118,7 +122,7 @@ where
             .get_dimensions();
 
         // Initialise transformation
-        let mut identity_matrix: OMatrix<f32, Dyn, Dyn> =
+        let mut registration_matrix: OMatrix<f32, Dyn, Dyn> =
             OMatrix::identity_generic(nalgebra::Dyn(dimension + 1), nalgebra::Dyn(dimension + 1));
 
         // Begin iterations
@@ -172,17 +176,29 @@ where
                 " r {} test {} homo {}",
                 rotation, translation, homogenous_mat
             );
-            identity_matrix *= homogenous_mat;
 
             // Transform target cloud
+            for point in &mut target_point_set.points {
+                point.apply_transformation(&homogenous_mat);
+            }
 
-            // Check termination condition
+            registration_matrix *= homogenous_mat;
 
             // Calculate cost
 
             println!("=== Finished iteration {} with cost {}", iteration, 0.0);
+
+            // Check termination condition
+            let translation_distance = self.get_translation_distance(&translation);
+            if translation_distance < self.dist_delta {
+                println!(
+                    "Reached termination threshold of {} with {} exiting!",
+                    self.dist_delta, translation_distance
+                );
+                break;
+            }
         }
 
-        identity_matrix
+        registration_matrix
     }
 }

@@ -41,13 +41,8 @@ fn main() {
     let icp = Icp::new(model_point_set.clone(), max_iterations, dist_delta);
 
     // Run ICP
-    let result = icp.register(target_point_set.clone());
+    let result = icp.register(&mut target_point_set);
     println!("{}", result);
-
-    // Apply transformation on target cloud
-    for point in &mut target_point_set.points {
-        point.apply_transformation(&result);
-    }
 
     // Visualise points
     visualise_points(&model_point_set, &target_point_set);
