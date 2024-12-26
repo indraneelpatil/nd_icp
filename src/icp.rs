@@ -94,9 +94,10 @@ where
             .copy_from(rotation);
 
         // Assign the translation part
+        let translation_inverted = translation * -1.0;
         homogeneous_matrix
             .view_mut((0, dimension), (dimension, 1))
-            .copy_from(&translation.transpose());
+            .copy_from(&translation_inverted.transpose());
 
         homogeneous_matrix
     }
@@ -185,7 +186,6 @@ where
             let translation = target_set_mean_mat
                 - (rotation.clone() * model_set_mean_mat.transpose()).transpose();
 
-            // Update identity matrix
             let homogenous_mat = self.get_homogeneous_matrix(&translation, &rotation, dimension);
             println!(
                 " r {} test {} homo {}",
@@ -197,6 +197,7 @@ where
                 point.apply_transformation(&homogenous_mat);
             }
 
+            // Update registration matrix
             registration_matrix *= homogenous_mat;
 
             // Calculate cost
