@@ -77,12 +77,27 @@ where
         target_mat
     }
 
-    pub fn get_homogenous_matrix(
+    pub fn get_homogeneous_matrix(
         &self,
         translation: &OMatrix<f32, U1, Dyn>,
         rotation: &OMatrix<f32, Dyn, Dyn>,
+        dimension: usize,
     ) -> OMatrix<f32, Dyn, Dyn> {
-        unimplemented!()
+        // Start with an identity matrix
+        let mut homogeneous_matrix: OMatrix<f32, Dyn, Dyn> =
+            OMatrix::identity_generic(nalgebra::Dyn(dimension + 1), nalgebra::Dyn(dimension + 1));
+
+        // Assign the rotation part
+        homogeneous_matrix
+            .view_mut((0, 0), (dimension, dimension))
+            .copy_from(rotation);
+
+        // Assign the translation part
+        homogeneous_matrix
+            .view_mut((0, dimension), (dimension, 1))
+            .copy_from(&translation.transpose());
+
+        homogeneous_matrix
     }
 
     /// ICP registrations
@@ -151,10 +166,12 @@ where
             let translation = target_set_mean_mat
                 - (rotation.clone() * model_set_mean_mat.transpose()).transpose();
 
-            println!(" r {} test {}", rotation, translation);
-
             // Update identity matrix
-            let homogenous_mat = self.get_homogenous_matrix(&translation, &rotation);
+            let homogenous_mat = self.get_homogeneous_matrix(&translation, &rotation, dimension);
+            println!(
+                " r {} test {} homo {}",
+                rotation, translation, homogenous_mat
+            );
             identity_matrix *= homogenous_mat;
 
             // Transform target cloud
