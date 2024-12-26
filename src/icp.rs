@@ -14,8 +14,9 @@ use crate::types::{Point, PointSet};
 ///
 /// Type can be a any n dimensional point
 /// TODO:
-/// 1. Outlier rejection of input data
-/// 2. Voxel binning
+/// 1. Profile the code
+/// 2. Outlier rejection of input data
+/// 3. Voxel binning
 pub struct Icp<T>
 where
     T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
@@ -104,6 +105,20 @@ where
         translation.iter().map(|val| val * val).sum::<f32>().sqrt()
     }
 
+    pub fn icp_cost(
+        &self,
+        target_mat_no_mean: &OMatrix<f32, Dyn, Dyn>,
+        model_mat_no_mean: &OMatrix<f32, Dyn, Dyn>,
+        rotation: &OMatrix<f32, Dyn, Dyn>,
+    ) -> f32 {
+        // Rotate the target mat
+        let rotated_target_mat = (rotation * target_mat_no_mean.transpose()).transpose();
+
+        // calculate cost
+        let cost = model_mat_no_mean - rotated_target_mat;
+        cost.norm()
+    }
+
     /// ICP registrations
     ///
     /// 1. Initialise the transformation given number of dimensions
@@ -154,7 +169,7 @@ where
             let target_mat = self.get_matrix_from_point_set(&target_points_no_mean, dimension);
             let model_mat =
                 self.get_matrix_from_point_set(&model_point_correspondences_no_mean, dimension);
-            let cross_covariance_mat = target_mat.transpose() * model_mat;
+            let cross_covariance_mat = target_mat.transpose() * model_mat.clone();
 
             // Find best rotation
             let res = nalgebra::linalg::SVD::new(cross_covariance_mat, true, true);
@@ -185,8 +200,11 @@ where
             registration_matrix *= homogenous_mat;
 
             // Calculate cost
-
-            println!("=== Finished iteration {} with cost {}", iteration, 0.0);
+            let icp_cost = self.icp_cost(&target_mat, &model_mat, &rotation);
+            println!(
+                "=== Finished iteration {} with cost {}",
+                iteration, icp_cost
+            );
 
             // Check termination condition
             let translation_distance = self.get_translation_distance(&translation);
