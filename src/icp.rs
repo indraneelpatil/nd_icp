@@ -98,10 +98,9 @@ where
             .copy_from(rotation);
 
         // Assign the translation part
-        let translation_inverted = translation * -1.0;
         homogeneous_matrix
             .view_mut((0, dimension), (dimension, 1))
-            .copy_from(&translation_inverted.transpose());
+            .copy_from(&translation.transpose());
 
         homogeneous_matrix
     }
@@ -175,7 +174,7 @@ where
             let target_mat = self.get_matrix_from_point_set(&target_points_no_mean, dimension);
             let model_mat =
                 self.get_matrix_from_point_set(&model_point_correspondences_no_mean, dimension);
-            let cross_covariance_mat = target_mat.transpose() * model_mat.clone();
+            let cross_covariance_mat = model_mat.transpose() * target_mat.clone();
 
             // Find best rotation
             let res = nalgebra::linalg::SVD::new(cross_covariance_mat, true, true);
@@ -188,8 +187,8 @@ where
                 OMatrix::from_vec_generic(U1, Dyn(dimension), target_set_mean.to_vec());
             let model_set_mean_mat =
                 OMatrix::from_vec_generic(U1, Dyn(dimension), model_set_mean.to_vec());
-            let translation = target_set_mean_mat
-                - (rotation.clone() * model_set_mean_mat.transpose()).transpose();
+            let translation = model_set_mean_mat
+                - (rotation.clone() * target_set_mean_mat.transpose()).transpose();
 
             let homogenous_mat = self.get_homogeneous_matrix(&translation, &rotation, dimension);
             println!(
