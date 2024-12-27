@@ -1,4 +1,5 @@
 use crate::types::{Point, Point3D, PointSet};
+use nalgebra::{Dyn, Matrix3, OMatrix, Quaternion, Rotation3, UnitQuaternion};
 use ply_rs::parser::Parser;
 use std::fs::File;
 use three_d::FrameOutput;
@@ -128,4 +129,16 @@ pub fn visualise_points(model_cloud: &PointSet<Point3D>, target_cloud: &PointSet
             ..Default::default()
         }
     });
+}
+
+pub fn get_quaternion_from_dynamic_rotation(rotation: &OMatrix<f32, Dyn, Dyn>) -> Quaternion<f32> {
+    assert!(
+        rotation.nrows() == 3 && rotation.ncols() == 3,
+        "Matrix must be 3x3"
+    );
+
+    let static_rotation = Matrix3::from_iterator(rotation.iter().cloned());
+    let rot = Rotation3::from_matrix(&static_rotation);
+
+    *UnitQuaternion::from_rotation_matrix(&rot)
 }

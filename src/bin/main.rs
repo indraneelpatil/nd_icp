@@ -1,4 +1,6 @@
+use nalgebra::{Rotation, Rotation3};
 use rust_icp::types::Point;
+use rust_icp::utils::get_quaternion_from_dynamic_rotation;
 use rust_icp::{
     icp::Icp,
     utils::{load_ply_as_point_set, visualise_points},
@@ -36,7 +38,7 @@ fn main() {
     };
 
     // Initialise ICP
-    let max_iterations = 20;
+    let max_iterations = 2;
     let cost_change_threshold = 1e-3;
     let icp = Icp::new(
         model_point_set.clone(),
@@ -46,7 +48,17 @@ fn main() {
 
     // Run ICP
     let result = icp.register(&mut target_point_set);
-    println!("{}", result);
+
+    // Print in readable form
+    let dimension = target_point_set
+        .points
+        .first()
+        .expect("No points in cloud")
+        .get_dimensions();
+    let translation = result.view((0, dimension), (dimension, 1));
+    let rotation = result.view((0, 0), (dimension, dimension)).clone_owned();
+    let quaternion = get_quaternion_from_dynamic_rotation(&rotation);
+    println!("Translation {} {}", translation, quaternion);
 
     // Visualise points
     visualise_points(&model_point_set, &target_point_set);
