@@ -25,19 +25,23 @@ where
     model_point_set: PointSet<T>,
     /// Max number of iterations to run
     max_iterations: i32,
-    /// Distance threshold to terminate after
-    dist_delta: f32,
+    /// Cost change threshold to terminate after
+    cost_change_threshold: f32,
 }
 
 impl<T> Icp<T>
 where
     T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
 {
-    pub fn new(model_point_set: PointSet<T>, max_iterations: i32, dist_delta: f32) -> Self {
+    pub fn new(
+        model_point_set: PointSet<T>,
+        max_iterations: i32,
+        cost_change_threshold: f32,
+    ) -> Self {
         Self {
             model_point_set,
             max_iterations,
-            dist_delta,
+            cost_change_threshold,
         }
     }
 
@@ -142,6 +146,7 @@ where
             OMatrix::identity_generic(nalgebra::Dyn(dimension + 1), nalgebra::Dyn(dimension + 1));
 
         // Begin iterations
+        let mut previous_cost = f32::MAX;
         for iteration in 0..self.max_iterations {
             // Find point correspondences
             let model_point_correspondences = self.get_point_correspondences(&target_point_set);
@@ -208,14 +213,14 @@ where
             );
 
             // Check termination condition
-            let translation_distance = self.get_translation_distance(&translation);
-            if translation_distance < self.dist_delta {
+            if (previous_cost - icp_cost).abs() < self.cost_change_threshold {
                 println!(
                     "Reached termination threshold of {} with {} exiting!",
-                    self.dist_delta, translation_distance
+                    self.cost_change_threshold, previous_cost
                 );
                 break;
             }
+            previous_cost = icp_cost;
         }
 
         registration_matrix

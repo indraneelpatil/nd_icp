@@ -37,8 +37,12 @@ fn main() {
 
     // Initialise ICP
     let max_iterations = 3;
-    let dist_delta = 1e-4;
-    let icp = Icp::new(model_point_set.clone(), max_iterations, dist_delta);
+    let cost_change_threshold = 1e-3;
+    let icp = Icp::new(
+        model_point_set.clone(),
+        max_iterations,
+        cost_change_threshold,
+    );
 
     // Run ICP
     let result = icp.register(&mut target_point_set);
