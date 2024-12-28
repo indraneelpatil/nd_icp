@@ -48,29 +48,35 @@ where
         }
     }
 
-    pub fn get_point_correspondences(&self, target_point_set: &PointSet<T>) -> Vec<T> {
-        let mut model_point_correspondences = vec![];
-        for target_point in &target_point_set.points {
-            let mut closest_point_idx = None;
+    pub fn get_point_correspondences(
+        &self,
+        target_point_set: &OMatrix<f32, Dyn, Dyn>,
+        model_point_set: &OMatrix<f32, Dyn, Dyn>,
+    ) -> OMatrix<f32, Dyn, Dyn> {
+        let nrows = target_point_set.nrows();
+        let ncols = target_point_set.ncols();
+
+        let mut correspondence_matrix =
+            OMatrix::zeros_generic(nalgebra::Dyn(nrows), nalgebra::Dyn(ncols));
+
+        for (target_point_idx, target_point) in target_point_set.row_iter().enumerate() {
+            let mut closest_model_point = None;
             let mut closest_dist = f32::MAX;
-            for (model_point_idx, model_point) in self.model_point_set.points.iter().enumerate() {
-                let point_dist = target_point.find_distance_squared(model_point);
+            for model_point in model_point_set.row_iter() {
+                let point_diff = model_point - target_point;
+                let point_dist = point_diff.norm_squared();
                 if point_dist < closest_dist {
                     closest_dist = point_dist;
-                    closest_point_idx = Some(model_point_idx);
+                    closest_model_point = Some(model_point);
                 }
             }
 
             // Save point correspondence
-            model_point_correspondences.push(
-                self.model_point_set
-                    .points
-                    .get(closest_point_idx.expect("Failed to get closest point"))
-                    .copied()
-                    .expect("Invalid closest point"),
-            );
+            correspondence_matrix
+                .row_mut(target_point_idx)
+                .copy_from(&closest_model_point.expect("Failed to get closest point"));
         }
-        model_point_correspondences
+        correspondence_matrix
     }
 
     pub fn get_matrix_from_point_set(
@@ -135,13 +141,17 @@ where
     /// 4. Find transformaton and rotation which will minimise the error
     /// 5. Transform the target cloud
     /// 6. Iterate until within error threshold or max iterations
-    pub fn register(&self, target_point_set: &mut PointSet<T>) -> OMatrix<f32, Dyn, Dyn> {
+    pub fn register(&self, target_point_set: &PointSet<T>) -> OMatrix<f32, Dyn, Dyn> {
         let dimension = target_point_set
             .points
             .iter()
             .next()
             .expect("Input set is empty")
             .get_dimensions();
+
+        // Vectorise point sets
+        let target_mat = self.get_matrix_from_point_set(&target_point_set.points, dimension);
+        let model_mat = self.get_matrix_from_point_set(&self.model_point_set.points, dimension);
 
         // Initialise transformation
         let mut registration_matrix: OMatrix<f32, Dyn, Dyn> =
@@ -151,7 +161,8 @@ where
         let mut previous_cost = f32::MAX;
         for iteration in 0..self.max_iterations {
             // Find point correspondences
-            let model_point_correspondences = self.get_point_correspondences(&target_point_set);
+            let model_point_correspondences =
+                self.get_point_correspondences(&target_mat, &model_mat);
 
             // Remove the means from the point clouds for better rotation matrix calculation
             let model_set_mean: T = model_point_correspondences
