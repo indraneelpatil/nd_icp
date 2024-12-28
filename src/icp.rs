@@ -150,7 +150,7 @@ where
             .get_dimensions();
 
         // Vectorise point sets
-        let target_mat = self.get_matrix_from_point_set(&target_point_set.points, dimension);
+        let mut target_mat = self.get_matrix_from_point_set(&target_point_set.points, dimension);
         let model_mat = self.get_matrix_from_point_set(&self.model_point_set.points, dimension);
 
         // Initialise transformation
@@ -165,18 +165,18 @@ where
 
             // Remove the means from the point clouds for better rotation matrix calculation
             let mean_correspondence_point = correspondence_mat.row_mean();
-            let correspondence_mat_no_mean = OMatrix::from_rows(
+            let correspondence_mat_no_mean: OMatrix<f32, Dyn, Dyn> = OMatrix::from_rows(
                 &correspondence_mat
                     .row_iter()
-                    .map(|row| row - mean_correspondence_point)
+                    .map(|row| row - mean_correspondence_point.clone_owned())
                     .collect::<Vec<_>>(),
             );
 
             let mean_target_point = target_mat.row_mean();
-            let target_mat_no_mean = OMatrix::from_rows(
+            let target_mat_no_mean: OMatrix<f32, Dyn, Dyn> = OMatrix::from_rows(
                 &target_mat
                     .row_iter()
-                    .map(|row| row - mean_target_point)
+                    .map(|row| row - mean_target_point.clone_owned())
                     .collect::<Vec<_>>(),
             );
 
@@ -191,12 +191,8 @@ where
             let rotation = u * vt;
 
             // Find translation
-            let target_set_mean_mat =
-                OMatrix::from_vec_generic(U1, Dyn(dimension), target_set_mean.to_vec());
-            let model_set_mean_mat =
-                OMatrix::from_vec_generic(U1, Dyn(dimension), model_set_mean.to_vec());
-            let translation = model_set_mean_mat
-                - (rotation.clone() * target_set_mean_mat.transpose()).transpose();
+            let translation = mean_correspondence_point
+                - (rotation.clone() * mean_target_point.transpose()).transpose();
 
             let homogenous_mat = self.get_homogeneous_matrix(&translation, &rotation, dimension);
             println!(
@@ -205,9 +201,7 @@ where
             );
 
             // Transform target cloud
-            for point in &mut target_point_set.points {
-                point.apply_transformation(&homogenous_mat);
-            }
+            target_mat = homogenous_mat.clone() * target_mat.transpose();
 
             // Update registration matrix
             registration_matrix *= homogenous_mat;
