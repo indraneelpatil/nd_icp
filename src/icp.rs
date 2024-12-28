@@ -161,34 +161,28 @@ where
         let mut previous_cost = f32::MAX;
         for iteration in 0..self.max_iterations {
             // Find point correspondences
-            let model_point_correspondences =
-                self.get_point_correspondences(&target_mat, &model_mat);
+            let correspondence_mat = self.get_point_correspondences(&target_mat, &model_mat);
 
             // Remove the means from the point clouds for better rotation matrix calculation
-            let model_set_mean: T = model_point_correspondences
-                .iter()
-                .map(|point| *point / model_point_correspondences.len() as f32)
-                .sum();
-            let model_point_correspondences_no_mean: Vec<T> = model_point_correspondences
-                .iter()
-                .map(|model_point| *model_point - model_set_mean)
-                .collect();
-            let target_set_mean: T = target_point_set
-                .points
-                .iter()
-                .map(|point| *point / target_point_set.points.len() as f32)
-                .sum();
-            let target_points_no_mean: Vec<T> = target_point_set
-                .points
-                .iter()
-                .map(|target_point| *target_point - target_set_mean)
-                .collect();
+            let mean_correspondence_point = correspondence_mat.row_mean();
+            let correspondence_mat_no_mean = OMatrix::from_rows(
+                &correspondence_mat
+                    .row_iter()
+                    .map(|row| row - mean_correspondence_point)
+                    .collect::<Vec<_>>(),
+            );
+
+            let mean_target_point = target_mat.row_mean();
+            let target_mat_no_mean = OMatrix::from_rows(
+                &target_mat
+                    .row_iter()
+                    .map(|row| row - mean_target_point)
+                    .collect::<Vec<_>>(),
+            );
 
             // Calculate cross covariance
-            let target_mat = self.get_matrix_from_point_set(&target_points_no_mean, dimension);
-            let model_mat =
-                self.get_matrix_from_point_set(&model_point_correspondences_no_mean, dimension);
-            let cross_covariance_mat = model_mat.transpose() * target_mat.clone();
+            let cross_covariance_mat =
+                correspondence_mat_no_mean.transpose() * target_mat_no_mean.clone();
 
             // Find best rotation
             let res = nalgebra::linalg::SVD::new(cross_covariance_mat, true, true);
