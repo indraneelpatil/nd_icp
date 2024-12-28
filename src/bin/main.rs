@@ -38,7 +38,7 @@ fn main() {
     };
 
     // Initialise ICP
-    let max_iterations = 2;
+    let max_iterations = 40;
     let cost_change_threshold = 1e-3;
     let icp = Icp::new(
         model_point_set.clone(),

@@ -17,6 +17,9 @@ use crate::types::{Point, PointSet};
 /// 1. Profile the code
 /// 2. Outlier rejection of input data
 /// 3. Voxel binning
+/// 4. Vectorise some stuff
+/// 5. Profile the code
+/// 6. Write some tests
 pub struct Icp<T>
 where
     T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
@@ -150,7 +153,7 @@ where
             // Find point correspondences
             let model_point_correspondences = self.get_point_correspondences(&target_point_set);
 
-            // Remove the means from the point clouds
+            // Remove the means from the point clouds for better rotation matrix calculation
             let model_set_mean: T = model_point_correspondences
                 .iter()
                 .map(|point| *point / model_point_correspondences.len() as f32)
