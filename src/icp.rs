@@ -6,7 +6,7 @@ use std::{
     ops::{Div, Sub},
 };
 
-use nalgebra::{Dyn, OMatrix, U1, U4};
+use nalgebra::{Const, Dyn, OMatrix, U1, U4};
 
 use crate::types::{Point, PointSet};
 
@@ -134,6 +134,21 @@ where
         cost.norm()
     }
 
+    /// Subtracts the row-wise mean from a matrix and returns the resulting matrix and the mean.
+    pub fn center_point_cloud_about_mean(
+        &self,
+        matrix: &OMatrix<f32, Dyn, Dyn>,
+    ) -> (OMatrix<f32, Dyn, Dyn>, OMatrix<f32, Const<1>, Dyn>) {
+        let mean_row = matrix.row_mean();
+        let matrix_no_mean = OMatrix::from_rows(
+            &matrix
+                .row_iter()
+                .map(|row| row - mean_row.clone_owned())
+                .collect::<Vec<_>>(),
+        );
+        (matrix_no_mean, mean_row)
+    }
+
     /// ICP registrations
     ///
     /// 1. Initialise the transformation given number of dimensions
@@ -166,21 +181,10 @@ where
             let correspondence_mat = self.get_point_correspondences(&target_mat, &model_mat);
 
             // Remove the means from the point clouds for better rotation matrix calculation
-            let mean_correspondence_point = correspondence_mat.row_mean();
-            let correspondence_mat_no_mean: OMatrix<f32, Dyn, Dyn> = OMatrix::from_rows(
-                &correspondence_mat
-                    .row_iter()
-                    .map(|row| row - mean_correspondence_point.clone_owned())
-                    .collect::<Vec<_>>(),
-            );
-
-            let mean_target_point = target_mat.row_mean();
-            let target_mat_no_mean: OMatrix<f32, Dyn, Dyn> = OMatrix::from_rows(
-                &target_mat
-                    .row_iter()
-                    .map(|row| row - mean_target_point.clone_owned())
-                    .collect::<Vec<_>>(),
-            );
+            let (correspondence_mat_no_mean, mean_correspondence_point) =
+                self.center_point_cloud_about_mean(&correspondence_mat);
+            let (target_mat_no_mean, mean_target_point) =
+                self.center_point_cloud_about_mean(&target_mat);
 
             // Calculate cross covariance
             let cross_covariance_mat =
@@ -310,5 +314,29 @@ mod tests {
             icp_fixture.get_point_correspondences(&target_shuffled, &model_matrix);
 
         assert_eq!(correspondence_mat, target_shuffled);
+    }
+
+    #[rstest]
+    fn test_center_point_cloud_about_mean(icp_fixture: Icp<Point3D>) {
+        let model_matrix =
+            icp_fixture.get_matrix_from_point_set(&icp_fixture.model_point_set.points, 3);
+
+        let expected_mean = OMatrix::<f32, Dyn, Dyn>::from_row_slice(1, 3, &[2.0, 2.0, 2.0]);
+
+        let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[
+                -1.0, -1.0, -1.0, // First row - mean
+                0.0, 0.0, 0.0, // Second row - mean
+                1.0, 1.0, 1.0, // Third row - mean
+            ],
+        );
+
+        // Call the function
+        let (result_matrix, result_mean) = icp_fixture.center_point_cloud_about_mean(&model_matrix);
+
+        assert_eq!(result_matrix, expected_matrix);
+        assert_eq!(result_mean, expected_mean);
     }
 }
