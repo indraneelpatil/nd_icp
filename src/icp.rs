@@ -17,9 +17,8 @@ use crate::types::{Point, PointSet};
 /// 1. Profile the code
 /// 2. Outlier rejection of input data
 /// 3. Voxel binning
-/// 4. Vectorise some stuff
-/// 5. Profile the code
-/// 6. Write some tests
+/// 4. Profile the code
+/// 5. Write some tests
 pub struct Icp<T>
 where
     T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
@@ -225,5 +224,59 @@ where
         }
 
         registration_matrix
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::types::Point3D;
+
+    use super::*;
+
+    use rstest::*;
+
+    #[fixture]
+    fn icp_fixture() -> Icp<Point3D> {
+        let max_iterations = 3;
+        let cost_change_threshold = 1e-3;
+
+        let model_point_set = PointSet {
+            points: vec![
+                Point3D {
+                    x: 1.0,
+                    y: 1.0,
+                    z: 1.0,
+                },
+                Point3D {
+                    x: 2.0,
+                    y: 2.0,
+                    z: 2.0,
+                },
+                Point3D {
+                    x: 3.0,
+                    y: 3.0,
+                    z: 3.0,
+                },
+            ],
+        };
+
+        Icp::new(model_point_set, max_iterations, cost_change_threshold)
+    }
+
+    #[rstest]
+    fn test_get_matrix_from_point_set(icp_fixture: Icp<Point3D>) {
+        let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_vec_generic(
+            Dyn(3),
+            Dyn(3),
+            [1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0].to_vec(),
+        );
+
+        let result_matrix =
+            icp_fixture.get_matrix_from_point_set(&icp_fixture.model_point_set.points, 3);
+
+        assert_eq!(result_matrix, expected_matrix);
+        assert_eq!(result_matrix.row(0), expected_matrix.row(0));
+        assert_eq!(result_matrix.row(1), expected_matrix.row(1));
+        assert_eq!(result_matrix.row(2), expected_matrix.row(2));
     }
 }
