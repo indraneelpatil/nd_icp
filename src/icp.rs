@@ -85,8 +85,11 @@ where
     ) -> OMatrix<f32, Dyn, Dyn> {
         let points_vec: Vec<Vec<f32>> = point_set.iter().map(|point| point.to_vec()).collect();
         let points_vec_flattened: Vec<f32> = points_vec.into_iter().flatten().collect();
-        let target_mat: OMatrix<f32, Dyn, Dyn> =
-            OMatrix::from_vec_generic(Dyn(point_set.len()), Dyn(dimension), points_vec_flattened);
+        let target_mat: OMatrix<f32, Dyn, Dyn> = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            point_set.len(),
+            dimension,
+            &points_vec_flattened,
+        );
         target_mat
     }
 
@@ -265,10 +268,10 @@ mod tests {
 
     #[rstest]
     fn test_get_matrix_from_point_set(icp_fixture: Icp<Point3D>) {
-        let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_vec_generic(
-            Dyn(3),
-            Dyn(3),
-            [1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0].to_vec(),
+        let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0],
         );
 
         let result_matrix =
@@ -278,5 +281,34 @@ mod tests {
         assert_eq!(result_matrix.row(0), expected_matrix.row(0));
         assert_eq!(result_matrix.row(1), expected_matrix.row(1));
         assert_eq!(result_matrix.row(2), expected_matrix.row(2));
+    }
+
+    #[rstest]
+    fn test_get_point_correspondences(icp_fixture: Icp<Point3D>) {
+        let target_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0],
+        );
+
+        let model_matrix =
+            icp_fixture.get_matrix_from_point_set(&icp_fixture.model_point_set.points, 3);
+
+        let correspondence_mat =
+            icp_fixture.get_point_correspondences(&target_matrix, &model_matrix);
+
+        assert_eq!(correspondence_mat, target_matrix);
+
+        // Shuffled order
+        let target_shuffled = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[3.0, 3.0, 3.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0],
+        );
+
+        let correspondence_mat =
+            icp_fixture.get_point_correspondences(&target_shuffled, &model_matrix);
+
+        assert_eq!(correspondence_mat, target_shuffled);
     }
 }
