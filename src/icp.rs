@@ -149,6 +149,27 @@ where
         (matrix_no_mean, mean_row)
     }
 
+    pub fn transform_matrix(
+        &self,
+        matrix: &mut OMatrix<f32, Dyn, Dyn>,
+        homogeneous_transformation_matrix: &OMatrix<f32, Dyn, Dyn>,
+    ) {
+        let nrows = matrix.nrows();
+        let ncols = matrix.ncols();
+
+        let mut homogeneous_representation = matrix.clone_owned();
+        homogeneous_representation = homogeneous_representation.insert_column(ncols, 1.0);
+
+        // Apply the homogeneous transformation
+        let transformed_homogeneous_matrix =
+            homogeneous_transformation_matrix * homogeneous_representation.transpose();
+
+        *matrix = transformed_homogeneous_matrix
+            .transpose()
+            .view((0, 0), (nrows, ncols))
+            .into_owned();
+    }
+
     /// ICP registrations
     ///
     /// 1. Initialise the transformation given number of dimensions
@@ -207,7 +228,7 @@ where
             );
 
             // Transform target cloud
-            target_mat = homogenous_mat.clone() * target_mat.transpose();
+            self.transform_matrix(&mut target_mat, &homogenous_mat);
 
             // Update registration matrix
             registration_matrix *= homogenous_mat;
@@ -244,7 +265,7 @@ mod tests {
 
     #[fixture]
     fn icp_fixture() -> Icp<Point3D> {
-        let max_iterations = 3;
+        let max_iterations = 1;
         let cost_change_threshold = 1e-3;
 
         let model_point_set = PointSet {
@@ -350,11 +371,7 @@ mod tests {
         let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
             3,
             3,
-            &[
-                -3.0, -3.0, -3.0, // First row - mean
-                0.0, 0.0, 0.0, // Second row - mean
-                3.0, 3.0, 3.0, // Third row - mean
-            ],
+            &[-3.0, -3.0, -3.0, 0.0, 0.0, 0.0, 3.0, 3.0, 3.0],
         );
 
         // Call the function
@@ -385,5 +402,78 @@ mod tests {
         let result_matrix = icp_fixture.get_homogeneous_matrix(&translation, &rotation, 3);
 
         assert_eq!(result_matrix, expected_matrix);
+    }
+
+    #[rstest]
+    fn test_transform_matrix(icp_fixture: Icp<Point3D>) {
+        let mut matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(2, 2, &[1.0, 2.0, 3.0, 4.0]);
+        let transformation = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+        );
+
+        let expected = OMatrix::<f32, Dyn, Dyn>::from_row_slice(2, 2, &[1.0, 2.0, 3.0, 4.0]);
+
+        icp_fixture.transform_matrix(&mut matrix, &transformation);
+        assert_eq!(matrix, expected);
+
+        // Translation
+        let transformation = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[1.0, 0.0, 1.0, 0.0, 1.0, 2.0, 0.0, 0.0, 1.0],
+        );
+
+        let expected = OMatrix::<f32, Dyn, Dyn>::from_row_slice(2, 2, &[2.0, 4.0, 4.0, 6.0]);
+
+        icp_fixture.transform_matrix(&mut matrix, &transformation);
+        assert_eq!(matrix, expected);
+    }
+
+    #[rstest]
+    fn test_icp_registration(icp_fixture: Icp<Point3D>) {
+        let target_point_set = PointSet {
+            points: vec![
+                Point3D {
+                    x: 1.0,
+                    y: 1.0,
+                    z: 1.0,
+                },
+                Point3D {
+                    x: 1.0,
+                    y: 1.0,
+                    z: 1.0,
+                },
+                Point3D {
+                    x: 2.0,
+                    y: 2.0,
+                    z: 2.0,
+                },
+                Point3D {
+                    x: 3.0,
+                    y: 3.0,
+                    z: 3.0,
+                },
+                Point3D {
+                    x: 3.0,
+                    y: 3.0,
+                    z: 3.0,
+                },
+            ],
+        };
+
+        // Expected transformation
+        let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            4,
+            4,
+            &[
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ],
+        );
+
+        let result = icp_fixture.register(&target_point_set);
+
+        assert_eq!(result, expected_matrix);
     }
 }
