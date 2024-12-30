@@ -338,5 +338,52 @@ mod tests {
 
         assert_eq!(result_matrix, expected_matrix);
         assert_eq!(result_mean, expected_mean);
+
+        let another_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
+        );
+
+        let expected_mean = OMatrix::<f32, Dyn, Dyn>::from_row_slice(1, 3, &[4.0, 5.0, 6.0]);
+
+        let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            3,
+            3,
+            &[
+                -3.0, -3.0, -3.0, // First row - mean
+                0.0, 0.0, 0.0, // Second row - mean
+                3.0, 3.0, 3.0, // Third row - mean
+            ],
+        );
+
+        // Call the function
+        let (result_matrix, result_mean) =
+            icp_fixture.center_point_cloud_about_mean(&another_matrix);
+
+        assert_eq!(result_matrix, expected_matrix);
+        assert_eq!(result_mean, expected_mean);
+    }
+
+    #[rstest]
+    fn test_get_homogeneous_matrix(icp_fixture: Icp<Point3D>) {
+        // Sample rotation matrix (identity for simplicity)
+        let rotation = OMatrix::<f32, Dyn, Dyn>::identity_generic(Dyn(3), Dyn(3));
+
+        // Sample translation vector
+        let translation = OMatrix::<f32, U1, Dyn>::from_row_slice(&[1.0, 2.0, 3.0]);
+
+        // Expected homogeneous matrix
+        let expected_matrix = OMatrix::<f32, Dyn, Dyn>::from_row_slice(
+            4,
+            4,
+            &[
+                1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 2.0, 0.0, 0.0, 1.0, 3.0, 0.0, 0.0, 0.0, 1.0,
+            ],
+        );
+
+        let result_matrix = icp_fixture.get_homogeneous_matrix(&translation, &rotation, 3);
+
+        assert_eq!(result_matrix, expected_matrix);
     }
 }
