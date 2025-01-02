@@ -2,6 +2,8 @@
 name = "nd-icp"
 version = "0.1.0"
 edition = "2021"
+description = "Generic n dimensional implementation of the ICP algorithm based on SVD and the nalgebra linear algebra library"
+license = "MIT"
 
 [[bin]]
 name = "icp_test"
