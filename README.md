@@ -1,5 +1,7 @@
 ### Results
-All experiments use bun000.ply as the model data file and initial transformation as identity
+* All experiments use bun000.ply as the model data file and initial transformation as identity
+* cargo run --release
+* ICP is not able to make up for bad initial transformation in the case of b090
 
 | Target Data File     | Before ICP       | After ICP        | Transformation & Iterations |
 |---------------------|------------------------|------------------------|-------------------------------------|
@@ -7,8 +9,10 @@ All experiments use bun000.ply as the model data file and initial transformation
 | bun090.ply   | ![Before](media/bun090_before.png) | ![After](media/b090_48_after.png)   | `[0.026355201,  0.020419816,  -0.014103075, 0.96028125 − (0.11255339, 0.17631948, 0.18467014)]` (48) |
 
 
+
 ### Flamegraph
-cargo flamegraph --dev --root
+* cargo flamegraph --dev --root
+* Most of the time is taken by get point correspondences
 ![Flamegraph](media/flamegraph.png)
 
 ### Preliminaries
@@ -81,3 +85,4 @@ cargo flamegraph --dev --root
 * https://youtube.com/@visualkernel/videos
 * https://people.eecs.berkeley.edu/~pabbeel/cs287-fa11/slides/perception-for-robotics-instance-detection.pdf
 * https://www.youtube.com/watch?v=dhzLQfDBx2Q
+* https://medium.com/@michaelscheinfeild/icp-iterative-closest-point-algorithm-32ecaf58e9da
