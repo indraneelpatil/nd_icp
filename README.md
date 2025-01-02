@@ -85,3 +85,4 @@
 * https://youtube.com/@visualkernel/videos
 * https://people.eecs.berkeley.edu/~pabbeel/cs287-fa11/slides/perception-for-robotics-instance-detection.pdf
 * https://www.youtube.com/watch?v=dhzLQfDBx2Q
+* https://medium.com/@michaelscheinfeild/icp-iterative-closest-point-algorithm-32ecaf58e9da
