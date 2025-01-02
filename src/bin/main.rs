@@ -22,7 +22,7 @@ fn main() {
     };
 
     // Target point cloud
-    let target_cloud_path = "data/bun045.ply";
+    let target_cloud_path = "data/bun090.ply";
     let mut target_point_set = match load_ply_as_point_set(target_cloud_path) {
         Ok(point_set) => {
             println!(
@@ -37,8 +37,8 @@ fn main() {
     };
 
     // Initialise ICP
-    let max_iterations = 20;
-    let cost_change_threshold = 1e-3;
+    let max_iterations = 100;
+    let cost_change_threshold = 1e-5;
     let icp = Icp::new(
         model_point_set.clone(),
         max_iterations,

@@ -1,10 +1,6 @@
 // Created by Indraneel on 12/8/24
 
 use core::f32;
-use std::{
-    iter::Sum,
-    ops::{Div, Sub},
-};
 
 use nalgebra::{Const, Dyn, OMatrix, U1};
 
@@ -14,13 +10,11 @@ use crate::types::{Point, PointSet};
 ///
 /// Type can be a any n dimensional point
 /// TODO:
-/// 1. Profile the code
-/// 2. Outlier rejection of input data
-/// 3. Voxel binning
-/// 4. Profile the code
+/// 1. Outlier rejection of input data
+/// 2. Voxel binning
 pub struct Icp<T>
 where
-    T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
+    T: Point + Copy,
 {
     /// Model reference to register against
     model_point_set: PointSet<T>,
@@ -32,7 +26,7 @@ where
 
 impl<T> Icp<T>
 where
-    T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
+    T: Point + Copy,
 {
     pub fn new(
         model_point_set: PointSet<T>,
