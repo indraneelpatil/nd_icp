@@ -6,7 +6,7 @@ use std::{
     ops::{Div, Sub},
 };
 
-use nalgebra::{Const, Dyn, OMatrix, U1, U4};
+use nalgebra::{Const, Dyn, Matrix, OMatrix, Storage, U1, U4};
 
 use crate::types::{Point, PointSet};
 
@@ -50,7 +50,6 @@ where
     pub fn get_point_correspondences(
         &self,
         target_point_set: &OMatrix<f32, Dyn, Dyn>,
-        model_point_set: &OMatrix<f32, Dyn, Dyn>,
     ) -> OMatrix<f32, Dyn, Dyn> {
         let nrows = target_point_set.nrows();
         let ncols = target_point_set.ncols();
@@ -58,22 +57,24 @@ where
         let mut correspondence_matrix =
             OMatrix::zeros_generic(nalgebra::Dyn(nrows), nalgebra::Dyn(ncols));
 
-        for (target_point_idx, target_point) in target_point_set.row_iter().enumerate() {
-            let mut closest_model_point = None;
+        for (target_point_idx, target_point_mat) in target_point_set.row_iter().enumerate() {
+            let mut closest_point: Option<T> = None;
             let mut closest_dist = f32::MAX;
-            for model_point in model_point_set.row_iter() {
-                let point_diff = model_point - target_point;
-                let point_dist = point_diff.norm_squared();
+
+            let target_point: T = Point::from_matrix(&target_point_mat);
+
+            for model_point in self.model_point_set.points.iter() {
+                let point_dist = target_point.find_distance_squared(model_point);
                 if point_dist < closest_dist {
                     closest_dist = point_dist;
-                    closest_model_point = Some(model_point);
+                    closest_point = Some(*model_point);
                 }
             }
 
             // Save point correspondence
             correspondence_matrix
                 .row_mut(target_point_idx)
-                .copy_from(&closest_model_point.expect("Failed to get closest point"));
+                .copy_from_slice(&closest_point.expect("Closest point not found").to_vec());
         }
         correspondence_matrix
     }
@@ -189,7 +190,6 @@ where
 
         // Vectorise point sets
         let mut target_mat = self.get_matrix_from_point_set(&target_point_set.points, dimension);
-        let model_mat = self.get_matrix_from_point_set(&self.model_point_set.points, dimension);
 
         // Initialise transformation
         let mut registration_matrix: OMatrix<f32, Dyn, Dyn> =
@@ -199,7 +199,7 @@ where
         let mut previous_cost = f32::MAX;
         for iteration in 0..self.max_iterations {
             // Find point correspondences
-            let correspondence_mat = self.get_point_correspondences(&target_mat, &model_mat);
+            let correspondence_mat = self.get_point_correspondences(&target_mat);
 
             // Remove the means from the point clouds for better rotation matrix calculation
             let (correspondence_mat_no_mean, mean_correspondence_point) =
@@ -215,7 +215,7 @@ where
             let res = nalgebra::linalg::SVD::new(cross_covariance_mat, true, true);
             let u = res.u.expect("Failed to calculate u matrix");
             let vt = res.v_t.expect("Failed to calculate vt matrix");
-            let rotation = vt.transpose() * u.transpose();
+            let rotation = u * vt;
 
             // Find translation
             let translation = mean_correspondence_point
@@ -317,11 +317,7 @@ mod tests {
             &[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0],
         );
 
-        let model_matrix =
-            icp_fixture.get_matrix_from_point_set(&icp_fixture.model_point_set.points, 3);
-
-        let correspondence_mat =
-            icp_fixture.get_point_correspondences(&target_matrix, &model_matrix);
+        let correspondence_mat = icp_fixture.get_point_correspondences(&target_matrix);
 
         assert_eq!(correspondence_mat, target_matrix);
 
@@ -332,8 +328,7 @@ mod tests {
             &[3.0, 3.0, 3.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0],
         );
 
-        let correspondence_mat =
-            icp_fixture.get_point_correspondences(&target_shuffled, &model_matrix);
+        let correspondence_mat = icp_fixture.get_point_correspondences(&target_shuffled);
 
         assert_eq!(correspondence_mat, target_shuffled);
     }

@@ -1,7 +1,7 @@
 use std::iter::Sum;
 use std::ops::{Div, Sub};
 
-use nalgebra::{Dyn, OMatrix, Vector3, Vector4, VectorN, U1, U4};
+use nalgebra::{Const, Dyn, Matrix, OMatrix, Storage, Vector3, Vector4, VectorN, U1, U4};
 // Created by Indraneel on 7th Dec
 use nalgebra::{SVector, U3};
 use ply_rs::ply;
@@ -20,6 +20,9 @@ pub trait Point {
     fn find_distance(&self, other_point: &Self) -> f32;
     fn find_distance_squared(&self, other_point: &Self) -> f32;
     fn to_vec(&self) -> Vec<f32>;
+    fn from_matrix<S>(matrix: &Matrix<f32, Const<1>, Dyn, S>) -> Self
+    where
+        S: Storage<f32, Const<1>, Dyn>;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -104,6 +107,21 @@ impl Point for Point3D {
 
     fn to_vec(&self) -> Vec<f32> {
         vec![self.x, self.y, self.z]
+    }
+
+    fn from_matrix<S>(matrix: &Matrix<f32, Const<1>, Dyn, S>) -> Self
+    where
+        S: Storage<f32, Const<1>, Dyn>,
+    {
+        if matrix.ncols() < 3 {
+            panic!("Matrix must have at least 3 columns to convert to Point3D");
+        }
+
+        Point3D {
+            x: matrix[(0, 0)],
+            y: matrix[(0, 1)],
+            z: matrix[(0, 2)],
+        }
     }
 }
 

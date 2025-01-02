@@ -38,7 +38,7 @@ fn main() {
     };
 
     // Initialise ICP
-    let max_iterations = 3;
+    let max_iterations = 5;
     let cost_change_threshold = 1e-3;
     let icp = Icp::new(
         model_point_set.clone(),
@@ -48,6 +48,11 @@ fn main() {
 
     // Run ICP
     let result = icp.register(&target_point_set);
+
+    // Apply the transformation
+    for point in &mut target_point_set.points {
+        point.apply_transformation(&result);
+    }
 
     // Print in readable form
     let dimension = target_point_set
