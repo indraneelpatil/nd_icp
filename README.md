@@ -4,6 +4,7 @@ All experiments use bun000.ply as the model data file and initial transformation
 | Target Data File     | Before ICP       | After ICP        | Transformation & Iterations |
 |---------------------|------------------------|------------------------|-------------------------------------|
 | bun045.ply   | ![Before](media/b045_before.png) | ![After](media/b045_19_after.png)   | `[-0.054025605, 0.008519982,  -0.02015043, 0.95982087 − (0.04597068, 0.27673486, -0.0069616223)]` (19) |
+| bun090.ply   | ![Before](media/bun090_before.png) | ![After](media/b090_48_after.png)   | `[0.026355201,  0.020419816,  -0.014103075, 0.96028125 − (0.11255339, 0.17631948, 0.18467014)]` (48) |
 
 
 ### Flamegraph
