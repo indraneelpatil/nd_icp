@@ -1,3 +1,11 @@
+### Results
+All experiments use bun000.ply as the model data file and initial transformation as identity
+
+| Target Data File     | Before ICP       | After ICP        | Transformation & Iterations |
+|---------------------|------------------------|------------------------|-------------------------------------|
+| bun045.ply   | ![Before](media/b045_before.png) | ![After](media/b045_19_after.png)   | `[-0.054025605, 0.008519982,  -0.02015043, 0.95982087 − (0.04597068, 0.27673486, -0.0069616223)]` (19) |
+
+
 ### Preliminaries
 #### Matrices
 * Is a function which takes in an input and gives an output
