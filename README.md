@@ -1,5 +1,6 @@
 ### Results
 All experiments use bun000.ply as the model data file and initial transformation as identity
+cargo run --release
 
 | Target Data File     | Before ICP       | After ICP        | Transformation & Iterations |
 |---------------------|------------------------|------------------------|-------------------------------------|
