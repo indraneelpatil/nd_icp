@@ -1,9 +1,12 @@
 [package]
 name = "nd-icp"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Generic n dimensional implementation of the ICP algorithm based on SVD and the nalgebra linear algebra library"
 license = "MIT"
+homepage = "https://github.com/indraneelpatil/rust_icp"
+repository = "https://github.com/indraneelpatil/rust_icp"
+documentation = "https://docs.rs/nd-icp/0.1.0/nd_icp"
 
 [[bin]]
 name = "icp_test"
