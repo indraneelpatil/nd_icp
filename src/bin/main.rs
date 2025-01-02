@@ -1,4 +1,3 @@
-use nalgebra::{Rotation, Rotation3};
 use rust_icp::types::Point;
 use rust_icp::utils::get_quaternion_from_dynamic_rotation;
 use rust_icp::{
@@ -38,7 +37,7 @@ fn main() {
     };
 
     // Initialise ICP
-    let max_iterations = 5;
+    let max_iterations = 20;
     let cost_change_threshold = 1e-3;
     let icp = Icp::new(
         model_point_set.clone(),

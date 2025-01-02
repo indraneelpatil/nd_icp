@@ -1,9 +1,9 @@
+// Created by Indraneel on 7th Dec
+
 use std::iter::Sum;
 use std::ops::{Div, Sub};
 
-use nalgebra::{Const, Dyn, Matrix, OMatrix, Storage, Vector3, Vector4, VectorN, U1, U4};
-// Created by Indraneel on 7th Dec
-use nalgebra::{SVector, U3};
+use nalgebra::{Const, Dyn, Matrix, OMatrix, Storage, U1, U4};
 use ply_rs::ply;
 
 #[derive(Clone, Debug)]
@@ -17,7 +17,6 @@ where
 pub trait Point {
     fn get_dimensions(&self) -> usize;
     fn apply_transformation(&mut self, transformation: &OMatrix<f32, Dyn, Dyn>);
-    fn find_distance(&self, other_point: &Self) -> f32;
     fn find_distance_squared(&self, other_point: &Self) -> f32;
     fn to_vec(&self) -> Vec<f32>;
     fn from_matrix<S>(matrix: &Matrix<f32, Const<1>, Dyn, S>) -> Self
@@ -90,13 +89,6 @@ impl Point for Point3D {
         self.x = transformed_coordinates[(0, 0)];
         self.y = transformed_coordinates[(1, 0)];
         self.z = transformed_coordinates[(2, 0)];
-    }
-
-    fn find_distance(&self, other_point: &Self) -> f32 {
-        ((other_point.x - self.x) * (other_point.x - self.x)
-            + (other_point.y - self.y) * (other_point.y - self.y)
-            + ((other_point.z - self.z) * (other_point.z - self.z)))
-            .sqrt()
     }
 
     fn find_distance_squared(&self, other_point: &Self) -> f32 {

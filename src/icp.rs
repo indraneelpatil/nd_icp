@@ -6,7 +6,7 @@ use std::{
     ops::{Div, Sub},
 };
 
-use nalgebra::{Const, Dyn, Matrix, OMatrix, Storage, U1, U4};
+use nalgebra::{Const, Dyn, OMatrix, U1};
 
 use crate::types::{Point, PointSet};
 
@@ -18,7 +18,6 @@ use crate::types::{Point, PointSet};
 /// 2. Outlier rejection of input data
 /// 3. Voxel binning
 /// 4. Profile the code
-/// 5. Write some tests
 pub struct Icp<T>
 where
     T: Point + Div<f32, Output = T> + Sum<T> + Copy + Sub<T, Output = T>,
@@ -115,10 +114,6 @@ where
             .copy_from(&translation.transpose());
 
         homogeneous_matrix
-    }
-
-    pub fn get_translation_distance(&self, translation: &OMatrix<f32, U1, Dyn>) -> f32 {
-        translation.iter().map(|val| val * val).sum::<f32>().sqrt()
     }
 
     pub fn icp_cost(
