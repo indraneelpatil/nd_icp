@@ -1,5 +1,5 @@
 ### Results
-All experiments use bun000.ply as the model data file
+All experiments use bun000.ply as the model data file and initial transformation as identity
 
 | Target Data File     | Image Before ICP       | Image After ICP        | Transformation & Iterations |
 |---------------------|------------------------|------------------------|-------------------------------------|
