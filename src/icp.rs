@@ -8,10 +8,33 @@ use crate::types::{Point, PointSet};
 
 /// N dimensional Icp
 ///
-/// Type can be a any n dimensional point
-/// TODO:
+/// # Salient features
+///
+/// 1. Generic Type can be any n dimensional point
+/// 2. Implement Point Trait for your point
+/// 3. Uses SVD to find rotation and translation
+/// 3. Vectorised operations to control time complexity
+///
+/// # Examples
+///
+/// ```
+///
+/// let max_iterations = 100;
+/// let cost_change_threshold = 1e-5;
+/// let icp = Icp::new(
+///    model_point_set.clone(),
+///    max_iterations,
+///    cost_change_threshold,
+/// );
+/// let result = icp.register(&target_point_set);
+///
+///
+/// ```
+///
+/// # TODO:
+///
 /// 1. Outlier rejection of input data
-/// 2. Voxel binning
+/// 2. Voxel binning to make finding correspondences faster
 pub struct Icp<T>
 where
     T: Point + Copy,
@@ -40,7 +63,9 @@ where
         }
     }
 
-    pub fn get_point_correspondences(
+    /// Finds closest point correspondences
+    /// between two sets of points
+    fn get_point_correspondences(
         &self,
         target_point_set: &OMatrix<f32, Dyn, Dyn>,
     ) -> OMatrix<f32, Dyn, Dyn> {
@@ -72,7 +97,9 @@ where
         correspondence_matrix
     }
 
-    pub fn get_matrix_from_point_set(
+    /// Converts a set of points to a Matrix with all points
+    /// stacked in rows
+    fn get_matrix_from_point_set(
         &self,
         point_set: &Vec<T>,
         dimension: usize,
@@ -87,7 +114,9 @@ where
         target_mat
     }
 
-    pub fn get_homogeneous_matrix(
+    /// Converts a rotation and translation to its homogeneous matrix
+    /// representation
+    fn get_homogeneous_matrix(
         &self,
         translation: &OMatrix<f32, U1, Dyn>,
         rotation: &OMatrix<f32, Dyn, Dyn>,
@@ -110,7 +139,8 @@ where
         homogeneous_matrix
     }
 
-    pub fn icp_cost(
+    /// Calculates the mean squared error between two sets of points
+    fn icp_cost(
         &self,
         target_mat_no_mean: &OMatrix<f32, Dyn, Dyn>,
         model_mat_no_mean: &OMatrix<f32, Dyn, Dyn>,
@@ -125,7 +155,7 @@ where
     }
 
     /// Subtracts the row-wise mean from a matrix and returns the resulting matrix and the mean.
-    pub fn center_point_cloud_about_mean(
+    fn center_point_cloud_about_mean(
         &self,
         matrix: &OMatrix<f32, Dyn, Dyn>,
     ) -> (OMatrix<f32, Dyn, Dyn>, OMatrix<f32, Const<1>, Dyn>) {
@@ -139,7 +169,8 @@ where
         (matrix_no_mean, mean_row)
     }
 
-    pub fn transform_matrix(
+    /// Applies a homogenous transformation to a matrix of points
+    fn transform_matrix(
         &self,
         matrix: &mut OMatrix<f32, Dyn, Dyn>,
         homogeneous_transformation_matrix: &OMatrix<f32, Dyn, Dyn>,
@@ -160,9 +191,9 @@ where
             .into_owned();
     }
 
-    /// ICP registrations
+    /// ICP registration
     ///
-    /// 1. Initialise the transformation given number of dimensions
+    /// 1. Initialises the transformation given number of dimensions
     /// 2. For each point
     ///     - Find closest point in reference cloud
     /// 3. Remove the means

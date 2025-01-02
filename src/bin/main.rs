@@ -1,6 +1,6 @@
-use rust_icp::types::Point;
-use rust_icp::utils::get_quaternion_from_dynamic_rotation;
-use rust_icp::{
+use nd_icp::types::Point;
+use nd_icp::utils::get_quaternion_from_dynamic_rotation;
+use nd_icp::{
     icp::Icp,
     utils::{load_ply_as_point_set, visualise_points},
 };

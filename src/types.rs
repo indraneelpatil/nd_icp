@@ -3,6 +3,8 @@
 use nalgebra::{Const, Dyn, Matrix, OMatrix, Storage, U1, U4};
 use ply_rs::ply;
 
+/// Generic container for holding a set of points, enforces
+/// the type of points to implement the Point trait
 #[derive(Clone, Debug)]
 pub struct PointSet<T>
 where
@@ -11,16 +13,24 @@ where
     pub points: Vec<T>,
 }
 
+/// trait definition for a point, implement these functions
+/// for your point struct
 pub trait Point {
+    /// Number of dimensions for the point
     fn get_dimensions(&self) -> usize;
+    /// Takes in a transformation matrix, applies it and updates the point
     fn apply_transformation(&mut self, transformation: &OMatrix<f32, Dyn, Dyn>);
+    /// Euclidean distance squared between two points
     fn find_distance_squared(&self, other_point: &Self) -> f32;
+    /// Converts the point into a vector container
     fn to_vec(&self) -> Vec<f32>;
+    /// Builds the point struct from a 1 dimensional matrix
     fn from_matrix<S>(matrix: &Matrix<f32, Const<1>, Dyn, S>) -> Self
     where
         S: Storage<f32, Const<1>, Dyn>;
 }
 
+/// Example 3D implementation of a point for use with ICP
 #[derive(Debug, Clone, Copy)]
 pub struct Point3D {
     pub x: f32,
