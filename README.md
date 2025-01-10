@@ -1,3 +1,10 @@
+### Salient features
+
+1. Generic Type can be any n dimensional point
+2. Implement Point Trait for your point
+3.  Uses SVD to find rotation and translation
+4.  Vectorised operations to control time complexity
+
 ### Results
 * All experiments use bun000.ply as the model data file and initial transformation as identity
 * cargo run --release
